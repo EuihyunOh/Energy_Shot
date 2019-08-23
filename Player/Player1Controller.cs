@@ -105,10 +105,4 @@ public class PlayerController : MonoBehaviour
                 break;
         }
     }
-
-    //주금
-    void Dead()
-    {
-
-    }
 }
