@@ -2,54 +2,35 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Skill
+public class Player1Controller : PlayerController
 {
-    Default,
-}
-public class PlayerController : MonoBehaviour
-{
-    //스탯
-    [Range(0.0f, 20.0f)]public float speed = 10.0f;
-
-    //외부 파라미터
-    public bool playerActive = true;
-
-    //연동할 프리팹 등록
-    public GameObject laserDefaultPrefab;
-    public GameObject EnergyDefaultPrefab;
-
-    //애니메이션 해시
-    public readonly static int ANISTS_Move_Front = Animator.StringToHash("Base Layer.Player_Move_Front");
-    public readonly static int ANISTS_Move_Back = Animator.StringToHash("Baase Layer.Player_Move_Back");
-
-    //내부 파라미터
-    Rigidbody2D rb2D;
-    Animator animator;
-
     // Start is called before the first frame update
-    void Start()
+    override protected void Start()
     {
+        base.Start();
         rb2D = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
     }
 
     // Update is called once per frame
     void Update()
-    {
+    {        
         //키 입력
-        float conMove_Vertical = Input.GetAxis("Vertical");
-        float conMove_Horizontal = Input.GetAxis("Horizontal");
+        
+        float conMove_Vertical = Input.GetAxis("Joystick1 Vertical");
+        float conMove_Horizontal = Input.GetAxis("Joystick1 Horizontal");
+        
         ActionMove(conMove_Horizontal, conMove_Vertical);
 
         //Fire 1 : 레이저 공격
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetButtonDown("Joystick1 Fire1"))
         {
             //Debug.Log("Fire1");
             LaserAttack(Skill.Default);
         }
 
         //Fire 2 : 에너지 공격
-        if (Input.GetButtonDown("Fire2"))
+        if (Input.GetButtonDown("Joystick1 Fire2"))
         {
             //Debug.Log("Fire2");
             EnergyAttack(Skill.Default);
@@ -57,52 +38,21 @@ public class PlayerController : MonoBehaviour
         
     }
 
-    void ActionMove(float input_X, float input_Y)
+    protected override void LaserAttack(Skill skill)
     {
-        //애니메이션 설정
-        //이동
-        if(input_X > 0.0f)
-        {
-            animator.SetTrigger("Move Front");
-        }
-        else if(input_X < 0.0f)
-        {
-            animator.SetTrigger("Move Back");
-        }
-        else
-        {
-            animator.SetTrigger("Idle");
-        }    
-        
-
-        //이동 
-        float velocity_X = input_X * speed;
-        float velocity_Y = input_Y * speed;
-
-        rb2D.velocity = new Vector2(velocity_X, velocity_Y);
-
-        
+        base.LaserAttack(skill);
+        //자원 소비
+        UpdateEnergy<Player1_UI>(-consumeAmount);
     }
 
-    
-
-    //스킬 A : 레이저 공격
-    void LaserAttack(Skill skill)
+    protected override void EnergyAttack(Skill skill)
     {
-        switch (skill) {
-           case Skill.Default :
-                Instantiate(laserDefaultPrefab, transform.position, Quaternion.identity);
-            break;
-        }
+        base.EnergyAttack(skill);
+        UpdateEnergy<Player1_UI>(-consumeAmount);
     }
 
-    void EnergyAttack(Skill skill)
+    private void LateUpdate()
     {
-        switch (skill)
-        {
-            case Skill.Default:
-                Instantiate(EnergyDefaultPrefab, transform.position, Quaternion.identity);
-                break;
-        }
+        GenerateEnergy<Player1_UI>();
     }
 }
