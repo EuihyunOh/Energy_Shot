@@ -40,14 +40,30 @@ public class Player1Controller : PlayerController
 
     protected override void LaserAttack(Skill skill)
     {
+        if (energy < consumeAmount)
+        {
+            //부족하면 경고 메세지
+            WarnMessage<Player1_UI>();
+            return;
+        }
+
         base.LaserAttack(skill);
         //자원 소비
         UpdateEnergy<Player1_UI>(-consumeAmount);
+        
     }
 
     protected override void EnergyAttack(Skill skill)
     {
+        if(energy < consumeAmount)
+        {
+            //부족하면 경고 메세지
+            WarnMessage<Player1_UI>();
+            return;
+        }
+
         base.EnergyAttack(skill);
+        //자원 소비
         UpdateEnergy<Player1_UI>(-consumeAmount);
     }
 

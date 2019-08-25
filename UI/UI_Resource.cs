@@ -6,13 +6,16 @@ using UnityEngine.UI;
 public class UI_Resource : MonoBehaviour
 {   
     public float updateTime = 0.4f;
+    public float messageDurationTime = 1.0f;
     protected Text energyAvailable;
-    protected Text energyConsume;
+    protected Text message;
+
+    protected bool isPrint = false;
     //Color textColor;
     
 
     // Start is called before the first frame update
-    protected virtual void Start()
+    protected virtual void Awake()
     {
         Text[] textList = GetComponentsInChildren<Text>(); 
 
@@ -22,7 +25,7 @@ public class UI_Resource : MonoBehaviour
             {
                 case "Energy Available": energyAvailable = text;
                     break;
-                case "Energy Consume": energyConsume = text;
+                case "Message": message = text;
                     break;
             }
         }
@@ -30,12 +33,25 @@ public class UI_Resource : MonoBehaviour
 
     }
 
+    //자원 숫자 업데이트
     public void UpdateNumber(int fromNum, int toNum)
     {
         //Debug.Log("Energy Update");        
         StartCoroutine(NumberCount(fromNum, toNum));        
     }
 
+
+    //메세지 출력
+    public void UpdateMessage(string text)
+    {
+        if (!isPrint)
+        {
+            isPrint = true;
+            StartCoroutine(Message(text));            
+        }        
+    }
+
+    //코루틴
     protected IEnumerator NumberCount(float startNum, float endNum)
     {
         //Debug.Log("Number Update Coroutine start!");
@@ -62,7 +78,17 @@ public class UI_Resource : MonoBehaviour
 
         energyAvailable.text = endNum.ToString();
     }
+  
+    protected IEnumerator Message(string text)
+    {
+        message.enabled = true;
+        message.text = text;        
 
+
+        yield return new WaitForSeconds(messageDurationTime);
+        message.enabled = false;
+        isPrint = false;
+    }
 
     /* 옆에 글씨로 알게 하는 방법
     void UpdateNumber()

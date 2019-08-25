@@ -5,9 +5,9 @@ using UnityEngine;
 public class Player2_UI : UI_Resource
 {
     // Start is called before the first frame update
-    protected override void Start()
+    protected override void Awake()
     {
-        base.Start();
+        base.Awake();
         UpdateNumber(0, FindObjectOfType<Player2Controller>().GetEnergy());
     }
 

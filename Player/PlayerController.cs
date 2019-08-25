@@ -75,6 +75,12 @@ public class PlayerController : MonoBehaviour
         }
         
     }
+
+    //자원 부족시 메세지 출력
+    protected void WarnMessage<T>() where T : UI_Resource
+    {
+        FindObjectOfType<T>().UpdateMessage("Not enough Energy");
+    }
     
 
     protected void ActionMove(float input_X, float input_Y)
@@ -134,6 +140,8 @@ public class PlayerController : MonoBehaviour
     {
         Destroy(gameObject);
     }
+
+    
 
     public int GetEnergy()
     {
