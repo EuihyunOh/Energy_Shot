@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class WeaponController : MonoBehaviour
 {
@@ -10,10 +11,12 @@ public class WeaponController : MonoBehaviour
     public float unitDuration = 1.0f;
     public int cost = 100;
 
+    protected GameController gameController;
     protected Transform muzzle;
     protected Rigidbody2D projectileRb2D;
     protected GameObject projectile;
     protected Animator animator;
+    
 
     protected float dir;
     protected bool isFire = false;
@@ -21,6 +24,10 @@ public class WeaponController : MonoBehaviour
     protected float fireStart = 0;
 
 
+    protected void Awake()
+    {
+        gameController = FindObjectOfType<GameController>();    
+    }
 
     // Start is called before the first frame update
     protected virtual void Start()
@@ -63,5 +70,9 @@ public class WeaponController : MonoBehaviour
         tag = ownerTag;
     }
 
-    
+    protected void OnDestroy()
+    {
+        Tilemap map = gameController.availableArea;
+        gameController.OffFlag(map.WorldToCell(transform.position));
+    }
 }

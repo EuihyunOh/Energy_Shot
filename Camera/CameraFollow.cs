@@ -25,6 +25,20 @@ public class CameraFollow : MonoBehaviour
     private void Start()
     {
         pos = transform.position;
+
+        //Debug.Log(string.Format("Attach to " + target.tag));
+        //캠 지정
+        switch (target.tag)
+        {
+            case "Player1": target.GetComponent<Player1Controller>().SetCamera(GetComponent<Camera>());
+                //Debug.Log("Player1 cam set");
+                break;
+
+            case "Player2":
+                target.GetComponent<Player2Controller>().SetCamera(GetComponent<Camera>());
+                //Debug.Log("Player2 cam set");
+                break;
+        }
     }
 
     private void LateUpdate()
