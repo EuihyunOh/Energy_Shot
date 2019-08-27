@@ -45,7 +45,7 @@ public class Energy_Default : WeaponController
         
 
     }
-        
+
     public void Destroy()
     {
         Destroy(gameObject);

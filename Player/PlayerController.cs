@@ -5,6 +5,7 @@ using UnityEngine;
 public enum Skill
 {
     Default,
+    Pattern,
 }
 
 public class PlayerController : MonoBehaviour
@@ -20,7 +21,8 @@ public class PlayerController : MonoBehaviour
 
     //연동할 프리팹 등록
     public GameObject laserDefaultPrefab;
-    public GameObject EnergyDefaultPrefab;
+    public GameObject laserPatternPrefab;
+    public GameObject energyDefaultPrefab;
 
     //애니메이션 해시
     public readonly static int ANISTS_Move_Front = Animator.StringToHash("Base Layer.Player_Move_Front");
@@ -36,6 +38,7 @@ public class PlayerController : MonoBehaviour
     protected int consumeAmount = 0;
     protected float energyGenTime = 0.0f;
     protected float timeCheck = 0.0f;
+    protected bool isAlive = true;
     
 
     protected virtual void Awake()
@@ -85,6 +88,11 @@ public class PlayerController : MonoBehaviour
 
     protected void ActionMove(float input_X, float input_Y)
     {
+        //생사 확인
+        if (!isAlive)
+        {
+            return;
+        }
         //애니메이션 설정
         //이동
         if (input_X > 0.0f)
@@ -117,23 +125,37 @@ public class PlayerController : MonoBehaviour
         switch (skill)
         {
             case Skill.Default:
-                Instantiate(laserDefaultPrefab, transform.position, Quaternion.identity);
-                //소비 자원량
-                consumeAmount = laserDefaultPrefab.GetComponent<Laser_Default>().cost;
+                SpawnWeapon<Laser_Default>(laserDefaultPrefab, transform.position, Quaternion.identity);
+                break;
+
+            case Skill.Pattern:
+                SpawnWeapon<Laser_Pattern>(laserPatternPrefab, transform.position, Quaternion.identity);
                 break;
         }
     }
 
+    //스킬 B : 에너지탄 공격
     protected virtual void EnergyAttack(Skill skill)
     {
         switch (skill)
         {
             case Skill.Default:
-                Instantiate(EnergyDefaultPrefab, transform.position, Quaternion.identity);
-                //소비 자원량
-                consumeAmount = EnergyDefaultPrefab.GetComponent<Energy_Default>().cost;
+                SpawnWeapon<Energy_Default>(energyDefaultPrefab, transform.position, Quaternion.identity);
+                
                 break;
         }
+    }
+
+    //무기 소환
+    protected void SpawnWeapon<T>(GameObject prefab, Vector3 pos, Quaternion quat) where T : WeaponController
+    {
+        GameObject ins = Instantiate(prefab, pos, quat);
+        ins.transform.localScale = new Vector3(transform.localScale.x, 1.0f, 1.0f);
+
+        T controller = ins.GetComponent<T>();
+        //소비 자원량 입수
+        consumeAmount = controller.cost;
+        controller.SetOwner(tag);
     }
 
     protected void DestroyObject()
@@ -156,5 +178,7 @@ public class PlayerController : MonoBehaviour
     public void Dead()
     {
         animator.SetTrigger("Dead");
+        isAlive = false;
+        rb2D.velocity = new Vector2();
     }
 }

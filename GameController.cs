@@ -12,6 +12,15 @@ public class GameController : MonoBehaviour
     void Start()
     {
         
+        string[] names = Input.GetJoystickNames();
+
+        for (int i = 0; i < names.Length; i++)
+
+        {
+
+            Debug.Log("Connected Joysticks :: " + "Joystick" + (i + 1) + " = " + names[i]);
+        }
+        
     }
 
     // Update is called once per frame

@@ -5,6 +5,7 @@ using UnityEngine;
 public class WeaponController : MonoBehaviour
 {
     public GameObject projectilePrefab;
+    public float projectileLifeTime = 10.0f;
     public float speed = 5.0f;
     public float unitDuration = 1.0f;
     public int cost = 100;
@@ -27,7 +28,7 @@ public class WeaponController : MonoBehaviour
         muzzle = GetComponentInChildren<Transform>();
         animator = GetComponent<Animator>();
 
-        dir = transform.localScale.x > 0 ? 1.0f : -1.0f;
+        dir = transform.localScale.x > 0 ? 1.0f : -1.0f;        
     }
 
     protected virtual void Update()
@@ -38,11 +39,15 @@ public class WeaponController : MonoBehaviour
         }
     }
 
+    //발사의 기본은 발사체 생성 공격
     protected virtual void Fire()
     {
         Vector3 trans = new Vector3(muzzle.position.x, muzzle.position.y, 0);
         projectile = Instantiate(projectilePrefab, trans, Quaternion.identity);
+        projectile.tag = tag;
         projectileRb2D = projectile.GetComponent<Rigidbody2D>();
+
+        Destroy(projectile, projectileLifeTime);
     }
 
     protected virtual void UnitDurationCheck()
@@ -52,4 +57,11 @@ public class WeaponController : MonoBehaviour
             animator.SetTrigger("Destroy");
         }
     }
+
+    public void SetOwner(string ownerTag)
+    {
+        tag = ownerTag;
+    }
+
+    
 }

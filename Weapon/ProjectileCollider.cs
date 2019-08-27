@@ -4,24 +4,27 @@ using UnityEngine;
 
 public class ProjectileCollider : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //Debug.Log(string.Format("owner : " + tag));
+        //Debug.Log(string.Format(collision.tag));
         //Debug.Log("Hit");
-        if (collision.tag.Equals("Player2"))
-        {
-            collision.GetComponent<Player2Controller>().Dead();
+        //발사의 주인과 다르면 발동
+        if (!collision.tag.Equals(tag) && tag != "Untagged")
+        {            
+            switch (collision.tag)
+            {
+                case "Player1":
+                    collision.GetComponent<Player1Controller>().Dead();
+
+                    break;
+
+                case "Player2":
+                    collision.GetComponent<Player2Controller>().Dead();
+                    break;
+            }
+            
         }
     }
 }

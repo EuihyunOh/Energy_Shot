@@ -25,6 +25,9 @@ public class Laser_Default : WeaponController
         base.Start();
         laser = GetComponentInChildren<LineRenderer>();
         boxCol = GetComponentInChildren<BoxCollider2D>();
+
+        //태그 설정
+        laser.tag = tag;
     }
 
     // Update is called once per frame
@@ -93,8 +96,9 @@ public class Laser_Default : WeaponController
         }
     }
 
-    void DestroyObject()
+    public void Destroy()
     {
         Destroy(gameObject);
-    }    
+    }
+
 }

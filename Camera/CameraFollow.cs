@@ -37,11 +37,11 @@ public class CameraFollow : MonoBehaviour
 
         if (!fixHorizon)
         {
-            x = Mathf.Clamp(target.position.x, horizonMin, horizonMax);            
+            x = Mathf.Clamp(target.position.x + dist, horizonMin, horizonMax);            
         }
         if (!fixVertical)
         {
-            y = Mathf.Clamp(target.position.y, verticalMin, verticalMax);
+            y = Mathf.Clamp(target.position.y + height, verticalMin, verticalMax);
         }
         
         transform.position = new Vector3(x, y, -10.0f);

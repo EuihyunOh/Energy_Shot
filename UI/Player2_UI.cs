@@ -14,6 +14,15 @@ public class Player2_UI : UI_Resource
     // Update is called once per frame
     void Update()
     {
-        
+        EnemyNevi();
+    }
+    void EnemyNevi()
+    {
+        if (FindObjectOfType<Player1Controller>() != null)
+        {
+            float enemy_posY = Mathf.Clamp(FindObjectOfType<Player1Controller>().transform.position.y, transform.position.y - (navi_posY_size / 2.0f), transform.position.y + (navi_posY_size / 2.0f));
+            float posX = transform.position.x + navi_posX;
+            navi.transform.position = new Vector3(posX, enemy_posY, 0.0f);
+        }
     }
 }

@@ -14,28 +14,36 @@ public class Player1Controller : PlayerController
 
     // Update is called once per frame
     void Update()
-    {        
+    {
         //키 입력
-        
-        float conMove_Vertical = Input.GetAxis("Joystick1 Vertical");
-        float conMove_Horizontal = Input.GetAxis("Joystick1 Horizontal");
-        
+
+        //float conMove_Vertical = Input.GetAxis("Joystick1 Vertical");
+        float conMove_Vertical = Input.GetAxis("Vertical");
+        //float conMove_Horizontal = Input.GetAxis("Joystick1 Horizontal");
+        float conMove_Horizontal = Input.GetAxis("Horizontal");
+
         ActionMove(conMove_Horizontal, conMove_Vertical);
 
         //Fire 1 : 레이저 공격
-        if (Input.GetButtonDown("Joystick1 Fire1"))
+        if (Input.GetButtonDown("Joystick1 Fire1") || Input.GetKeyDown(KeyCode.Joystick1Button0))
         {
             //Debug.Log("Fire1");
             LaserAttack(Skill.Default);
-        }
+        }        
 
         //Fire 2 : 에너지 공격
-        if (Input.GetButtonDown("Joystick1 Fire2"))
+        if (Input.GetButtonDown("Joystick1 Fire2") || Input.GetKeyDown(KeyCode.Joystick1Button1))
         {
             //Debug.Log("Fire2");
             EnergyAttack(Skill.Default);
         }
-        
+
+        //Fire 3 : 레이저 패턴 공격
+        if(Input.GetButtonDown("Joystick1 Fire3") || Input.GetKeyDown(KeyCode.Joystick1Button2))
+        {
+            //Debug.Log("Fire3");
+            LaserAttack(Skill.Pattern);
+        }
     }
 
     protected override void LaserAttack(Skill skill)
