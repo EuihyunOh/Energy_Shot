@@ -14,8 +14,10 @@ public class Player2Controller : PlayerController
     }
 
     // Update is called once per frame
-    void Update()
+    override protected void Update()
     {
+        base.Update();
+
         //키 입력
 
         float conMove_Vertical = Input.GetAxis("Joystick2 Vertical");

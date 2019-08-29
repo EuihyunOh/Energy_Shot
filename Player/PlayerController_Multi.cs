@@ -4,13 +4,16 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using System;
 
-public enum Skill
+using Photon.Pun;
+using Photon.Realtime;
+
+public enum Skill_List
 {
     Default,
     Pattern,
 }
 
-public class PlayerController : MonoBehaviour
+public class PlayerController_Multi : MonoBehaviourPunCallbacks, IPunObservable
 {
     //스탯
     [Range(0.0f, 20.0f)] public float speed = 10.0f;
@@ -24,12 +27,13 @@ public class PlayerController : MonoBehaviour
     public GameObject laserDefaultPrefab;
     public GameObject laserPatternPrefab;
     public GameObject energyDefaultPrefab;
-    
+
 
 
     //애니메이션 해시
-    public readonly static int ANISTS_Move_Front = Animator.StringToHash("Base Layer.Player_Move_Front");
-    public readonly static int ANISTS_Move_Back = Animator.StringToHash("Baase Layer.Player_Move_Back");
+    public readonly static int ANISTS_IDLE = Animator.StringToHash("Base Layer.Player_Idle");
+    public readonly static int ANISTS_MOVE_FRONT = Animator.StringToHash("Base Layer.Player_Move_Front");
+    public readonly static int ANISTS_MOVE_BACK = Animator.StringToHash("Baase Layer.Player_Move_Back");
 
     //내부 파라미터
     protected Rigidbody2D rb2D;
@@ -46,7 +50,7 @@ public class PlayerController : MonoBehaviour
     protected bool isAlive = true;
     protected bool spawnAvailable = true;
 
-    
+    AnimatorStateInfo ANISTS;
     
 
     protected virtual void Awake()
@@ -61,15 +65,70 @@ public class PlayerController : MonoBehaviour
     protected virtual void Start()
     {
         rb2D = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();        
+        animator = GetComponent<Animator>();
+
+        if (photonView.IsMine)
+        {
+            //카메라 연결
+            FindObjectOfType<CameraFollow>().target = transform;
+        }
     }
 
     protected virtual void Update()
     {
-        if (!playerActive)
+        if (photonView.IsMine) // 내 캐릭터이면 작동
         {
-            return;
+            float x = Input.GetAxis("Horizontal");
+            float y = Input.GetAxis("Vertical");
+
+            ActionMove(x, y);
+            ANISTS = animator.GetCurrentAnimatorStateInfo(0);
+
+            if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.Q))
+            {
+                if (energy < consumeAmount)
+                {
+                    //부족하면 경고 메세지
+                    WarnMessage<Player_UI_Multi>();
+                }
+                else
+                {
+                    LaserAttack(Skill_List.Default);
+                    //자원 소비
+                    UpdateEnergy<Player_UI_Multi>(-consumeAmount);
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.W))
+            {
+                if (energy < consumeAmount)
+                {
+                    //부족하면 경고 메세지
+                    WarnMessage<Player_UI_Multi>();
+                }
+                else
+                {
+                    EnergyAttack(Skill_List.Default);
+                    //자원 소비
+                    UpdateEnergy<Player_UI_Multi>(-consumeAmount);
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.JoystickButton2) || Input.GetKeyDown(KeyCode.E))
+            {
+
+            }
         }
+        else // 내 캐릭터가 아니라면 작동
+        {
+            //네비게이션 대상으로 지정
+            FindObjectOfType<Player_UI_Multi>().enemyPos = transform.position;
+            FindObjectOfType<Player_UI_Multi>().isEnemySet = true;
+
+        }
+    }
+
+    protected void LateUpdate()
+    {
+        GenerateEnergy<Player_UI_Multi>();
     }
 
     //자원 UI에 업데이트
@@ -142,34 +201,34 @@ public class PlayerController : MonoBehaviour
     
 
     //스킬 A : 레이저 공격
-    protected virtual void LaserAttack(Skill skill)
+    protected virtual void LaserAttack(Skill_List skill)
     {
         switch (skill)
         {
-            case Skill.Default:
-                SpawnWeapon<Laser_Default>(laserDefaultPrefab, Quaternion.identity);
+            case Skill_List.Default:
+                SpawnWeapon<Laser_Default_Multi>(this.laserDefaultPrefab, Quaternion.identity);
                 break;
 
-            case Skill.Pattern:
-                SpawnWeapon<Laser_Pattern>(laserPatternPrefab,  Quaternion.identity);
+            case Skill_List.Pattern:
+                SpawnWeapon<Laser_Pattern_Multi>(laserPatternPrefab,  Quaternion.identity);
                 break;
         }
     }
 
     //스킬 B : 에너지탄 공격
-    protected virtual void EnergyAttack(Skill skill)
+    protected virtual void EnergyAttack(Skill_List skill)
     {
         switch (skill)
         {
-            case Skill.Default:
-                SpawnWeapon<Energy_Default>(energyDefaultPrefab, Quaternion.identity);
+            case Skill_List.Default:
+                SpawnWeapon<Energy_Default_Multi>(energyDefaultPrefab, Quaternion.identity);
                 
                 break;
         }
     }
 
     //무기 소환
-    protected void SpawnWeapon<T>(GameObject prefab, Quaternion quat) where T : WeaponController
+    protected void SpawnWeapon<T>(GameObject prefab, Quaternion quat) where T : WeaponController_Multi
     {
         Vector3 spawnPoint = GetSpawnPoint();
 
@@ -177,8 +236,7 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-
-        GameObject ins = Instantiate(prefab, spawnPoint, quat);
+        GameObject ins = PhotonNetwork.Instantiate(prefab.name, spawnPoint, quat);
         ins.transform.localScale = new Vector3(transform.localScale.x, 1.0f, 1.0f);
 
         T controller = ins.GetComponent<T>();
@@ -209,7 +267,10 @@ public class PlayerController : MonoBehaviour
     //오브젝트 제거
     protected void DestroyObject()
     {
-        Destroy(gameObject);
+        if (photonView.IsMine)
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }        
     }
 
     //Follow하는 camera 가져오기
@@ -233,8 +294,19 @@ public class PlayerController : MonoBehaviour
     //죽는 애니메이션 재생 및 관련 파라미터 조정
     public void Dead()
     {
-        animator.SetTrigger("Dead");
-        isAlive = false;
-        rb2D.velocity = new Vector2();
+        if (photonView.IsMine)
+        {
+            animator.SetTrigger("Dead");
+            isAlive = false;
+            rb2D.velocity = new Vector2();
+        }        
+    }
+
+
+    
+    // 기타 변수를 넘길때 사용
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {        
+        
     }
 }

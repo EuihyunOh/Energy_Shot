@@ -28,6 +28,11 @@ public class CameraFollow : MonoBehaviour
 
         //Debug.Log(string.Format("Attach to " + target.tag));
         //캠 지정
+        if(target == null)
+        {
+            return;
+        }
+
         switch (target.tag)
         {
             case "Player1": target.GetComponent<Player1Controller>().SetCamera(GetComponent<Camera>());

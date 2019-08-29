@@ -5,9 +5,20 @@ using UnityEngine.SceneManagement;
 
 public class Intro_Button : MonoBehaviour
 {
-    public void StartClick()
+    private void Start()
+    {
+        Screen.SetResolution(1280, 720, false);
+
+
+    }
+public void StartClick()
     {
         SceneManager.LoadScene(1);
+    }
+
+    public void MultiPlayeClick()
+    {
+        SceneManager.LoadScene(3);
     }
 
     public void SettingClick()

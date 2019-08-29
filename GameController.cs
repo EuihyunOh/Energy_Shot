@@ -6,7 +6,8 @@ using UnityEngine.Tilemaps;
 public class GameController : MonoBehaviour
 {
     public Tilemap availableArea;
-
+    public GameObject player1SpawnPoint;
+    public GameObject player2SpawnPoint;
     public float energyGenTime;
     public int genEnergyMount = 0;
     public int initEnergy = 0;
@@ -16,7 +17,9 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        //해상도 고정
+        Screen.SetResolution(1280, 720, false);
+
         string[] names = Input.GetJoystickNames();
 
         for (int i = 0; i < names.Length; i++)
